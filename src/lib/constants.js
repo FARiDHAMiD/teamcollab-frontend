@@ -15,9 +15,9 @@ export const TASK_PRIORITY = {
 
 // User Roles
 export const USER_ROLES = {
-  MANAGER: 'Manager',
-  DEVELOPER: 'Developer',
-  TESTER: 'Tester',
+  MANAGER: 'manager',
+  DEVELOPER: 'developer',
+  TESTER: 'tester',
 };
 
 // Mock API URLs

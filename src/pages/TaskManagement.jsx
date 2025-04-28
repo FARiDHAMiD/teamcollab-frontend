@@ -53,7 +53,7 @@ const TaskManagement = () => {
     if (!authLoading) {
       if (!user) {
         navigate('/auth?mode=login');
-      } else if (user.role !== USER_ROLES.MANAGER) {
+      } else if (user.role !== 'manager') {
         navigate('/dashboard');
       }
     }
@@ -68,7 +68,7 @@ const TaskManagement = () => {
     setFilteredTasks(filtered);
   }, [tasks, searchTerm]);
   
-  if (authLoading || taskLoading) {
+  if (taskLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -79,7 +79,7 @@ const TaskManagement = () => {
     );
   }
   
-  if (!user || user.role !== USER_ROLES.MANAGER) return null;
+  if (!user || user.role !== 'manager') return null;
   
   const handleDeleteTask = async () => {
     if (selectedTask) {

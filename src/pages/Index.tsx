@@ -35,14 +35,14 @@ const Index = () => {
                   <Button 
                     size="lg" 
                     className="hive-gradient text-white"
-                    onClick={() => navigate('/auth?mode=register')}
+                    onClick={() => navigate('/register')}
                   >
                     Get Started
                   </Button>
                   <Button 
                     size="lg" 
                     variant="outline"
-                    onClick={() => navigate('/auth?mode=login')}
+                    onClick={() => navigate('/login')}
                   >
                     Login
                   </Button>

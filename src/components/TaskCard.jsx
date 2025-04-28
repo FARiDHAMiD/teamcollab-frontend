@@ -1,21 +1,26 @@
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTask } from '@/context/TaskContext';
-import { useAuth } from '@/context/AuthContext';
-import { 
-  Clock, 
-  Calendar, 
-  User, 
-  MessageSquare, 
-  ChevronDown, 
-  ChevronUp 
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { TASK_STATUS } from '@/lib/constants';
-import CommentSection from './CommentSection';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTask } from "@/context/TaskContext";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Clock,
+  Calendar,
+  User,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { TASK_STATUS } from "@/lib/constants";
+import CommentSection from "./CommentSection";
 
 const TaskCard = ({ task, showComments = false }) => {
   const { updateTask } = useTask();
@@ -23,51 +28,63 @@ const TaskCard = ({ task, showComments = false }) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(showComments);
   const [statusLoading, setStatusLoading] = useState(false);
-  
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     }).format(date);
   };
 
   const handleStatusChange = async (newStatus) => {
     if (task.status === newStatus) return;
-    
+
     setStatusLoading(true);
     try {
       await updateTask(task.id, { status: newStatus });
     } catch (error) {
-      console.error('Failed to update task status:', error);
+      console.error("Failed to update task status:", error);
     } finally {
       setStatusLoading(false);
     }
   };
-  
+
   // Choose the badge color based on priority
   const getPriorityBadge = (priority) => {
     switch (priority) {
-      case 'High':
-        return <Badge variant="outline" className="task-priority-high">High</Badge>;
-      case 'Medium':
-        return <Badge variant="outline" className="task-priority-medium">Medium</Badge>;
-      case 'Low':
-        return <Badge variant="outline" className="task-priority-low">Low</Badge>;
+      case "high":
+        return (
+          <Badge variant="outline" className="task-priority-high">
+            High
+          </Badge>
+        );
+      case "medium":
+        return (
+          <Badge variant="outline" className="task-priority-medium">
+            Medium
+          </Badge>
+        );
+      case "low":
+        return (
+          <Badge variant="outline" className="task-priority-low">
+            Low
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
-  
+
   // Choose the status badge color
   const getStatusBadge = (status) => {
     switch (status) {
-      case TASK_STATUS.IN_PROGRESS:
+      case "in_progress":
         return <Badge className="status-in-progress">{status}</Badge>;
-      case TASK_STATUS.PENDING:
+      case "pending":
         return <Badge className="status-pending">{status}</Badge>;
-      case TASK_STATUS.COMPLETED:
+      case "completed":
         return <Badge className="status-completed">{status}</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -76,11 +93,11 @@ const TaskCard = ({ task, showComments = false }) => {
 
   // Determine if user can update the task status
   const canUpdateStatus = () => {
-    if (user.role === 'Manager') return true;
-    if (user.id === task.assignedTo.id) return true;
+    if (user.role === "manager") return true;
+    if (user.user_id === task.assigned_to.id) return true;
     return false;
   };
-  
+
   return (
     <Card className="mb-4 transition-all hover:shadow-md">
       <CardHeader className="pb-2">
@@ -97,43 +114,47 @@ const TaskCard = ({ task, showComments = false }) => {
         <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-500">
           <div className="flex items-center space-x-2">
             <User className="h-4 w-4" />
-            <span>{task.assignedTo.name}</span>
+            <span>{task.assigned_to.username}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4" />
-            <span>Due: {formatDate(task.dueDate)}</span>
+            <span>Due: {formatDate(task.due_date)}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4" />
-            <span>Created: {formatDate(task.createdAt)}</span>
+            <span>Created: {formatDate(task.created_at)}</span>
           </div>
-          <div 
-            className="flex items-center space-x-2 cursor-pointer" 
+          <div
+            className="flex items-center space-x-2 cursor-pointer"
             onClick={() => setExpanded(!expanded)}
           >
             <MessageSquare className="h-4 w-4" />
             <span>Comments</span>
-            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {expanded ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
           </div>
         </div>
       </CardContent>
-      
+
       {expanded && <CommentSection taskId={task.id} />}
-      
+
       {canUpdateStatus() && task.status !== TASK_STATUS.COMPLETED && (
         <CardFooter className="pt-2 flex justify-end space-x-2">
           {task.status === TASK_STATUS.PENDING && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               disabled={statusLoading}
               onClick={() => handleStatusChange(TASK_STATUS.IN_PROGRESS)}
             >
               Start Progress
             </Button>
           )}
-          <Button 
-            variant="default" 
+          <Button
+            variant="default"
             size="sm"
             disabled={statusLoading}
             onClick={() => handleStatusChange(TASK_STATUS.COMPLETED)}

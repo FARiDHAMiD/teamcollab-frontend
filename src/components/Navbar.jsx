@@ -200,10 +200,10 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex space-x-4">
-                <Button variant="ghost" onClick={() => navigate("/login")}>
+                <Button onClick={() => navigate("/login")}>
                   Log in
                 </Button>
-                <Button onClick={() => navigate("/signup")}>Register</Button>
+                {/* <Button onClick={() => navigate("/signup")}>Register</Button> */}
               </div>
             )}
 

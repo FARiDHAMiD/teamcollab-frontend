@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "./AuthContext";
+import AuthContext, { useAuth } from "./AuthContext";
 import AxiosInstance from "../components/utils/AxiosInstance";
+import { toast } from "react-toastify";
 
 const TaskContext = createContext();
 
@@ -12,8 +13,7 @@ export const TaskProvider = ({ children }) => {
   const [comments, setComments] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
 
   const getTasks = async () => {
     try {
@@ -59,110 +59,6 @@ export const TaskProvider = ({ children }) => {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    // // Mock tasks
-    // const mockTasks = [
-    //   {
-    //     id: 1,
-    //     title: "Implement User Authentication",
-    //     description: "Create a secure authentication system with JWT tokens",
-    //     status: TASK_STATUS.IN_PROGRESS,
-    //     priority: TASK_PRIORITY.HIGH,
-    //     assigned_to: { id: 2, name: "Jane developer", role: "developer" },
-    //     created_by: { id: 1, name: "John manager", role: "manager" },
-    //     created_at: "2023-11-01T10:00:00Z",
-    //     dueDate: "2023-11-10T17:00:00Z",
-    //   },
-    //   {
-    //     id: 2,
-    //     title: "Test Login Functionality",
-    //     description:
-    //       "Perform thorough testing of the login and registration flows",
-    //     status: TASK_STATUS.PENDING,
-    //     priority: TASK_PRIORITY.MEDIUM,
-    //     assigned_to: { id: 3, name: "Mark tester", role: "tester" },
-    //     created_by: { id: 1, name: "John manager", role: "manager" },
-    //     created_at: "2023-11-02T09:30:00Z",
-    //     dueDate: "2023-11-12T17:00:00Z",
-    //   },
-    //   {
-    //     id: 3,
-    //     title: "Design Task Management UI",
-    //     description:
-    //       "Create wireframes and UI components for the task management interface",
-    //     status: TASK_STATUS.COMPLETED,
-    //     priority: TASK_PRIORITY.MEDIUM,
-    //     assigned_to: { id: 2, name: "Jane developer", role: "developer" },
-    //     created_by: { id: 1, name: "John manager", role: "manager" },
-    //     created_at: "2023-11-01T11:20:00Z",
-    //     dueDate: "2023-11-08T17:00:00Z",
-    //   },
-    //   {
-    //     id: 4,
-    //     title: "API Documentation",
-    //     description:
-    //       "Document all API endpoints with request and response examples",
-    //     status: TASK_STATUS.IN_PROGRESS,
-    //     priority: TASK_PRIORITY.LOW,
-    //     assigned_to: { id: 2, name: "Jane developer", role: "developer" },
-    //     created_by: { id: 1, name: "John manager", role: "manager" },
-    //     created_at: "2023-11-03T13:15:00Z",
-    //     dueDate: "2023-11-18T17:00:00Z",
-    //   },
-    //   {
-    //     id: 5,
-    //     title: "Fix Notification Bug",
-    //     description: "Notifications are not showing real-time updates properly",
-    //     status: TASK_STATUS.PENDING,
-    //     priority: TASK_PRIORITY.HIGH,
-    //     assigned_to: { id: 2, name: "Jane developer", role: "developer" },
-    //     created_by: { id: 1, name: "John manager", role: "manager" },
-    //     created_at: "2023-11-04T09:45:00Z",
-    //     dueDate: "2023-11-09T17:00:00Z",
-    //   },
-    // ];
-
-    // Mock comments
-    const mockComments = [
-      {
-        id: 1,
-        task: 1,
-        author: { id: 2, username: "Jane developer", role: "developer" },
-        content:
-          "I'm working on implementing JWT authentication. Should be done by tomorrow.",
-        created_at: "2023-11-03T14:22:00Z",
-      },
-      {
-        id: 2,
-        task: 1,
-        author: { id: 1, username: "John manager", role: "manager" },
-        content:
-          "Great! Make sure to include refresh token functionality. @Jane developer",
-        created_at: "2023-11-03T15:45:00Z",
-      },
-      {
-        id: 3,
-        task: 2,
-        author: { id: 3, username: "Mark tester", role: "tester" },
-        content:
-          "I've started the testing process and found a few edge cases we need to handle.",
-        created_at: "2023-11-04T10:12:00Z",
-      },
-      {
-        id: 4,
-        task: 3,
-        author: { id: 2, username: "Jane developer", role: "developer" },
-        content: "UI components are completed and ready for review.",
-        created_at: "2023-11-05T16:30:00Z",
-      },
-      {
-        id: 5,
-        task: 3,
-        author: { id: 1, username: "John manager", role: "manager" },
-        content: "They look great! @Mark tester can you verify usability?",
-        created_at: "2023-11-05T17:15:00Z",
-      },
-    ];
-
     // Mock notifications
     const mockNotifications = [
       {
@@ -195,69 +91,49 @@ export const TaskProvider = ({ children }) => {
 
   // Add a new task
   const addTask = async (taskData) => {
+    setLoading(true);
+    // API call
+    await new Promise((resolve) => setTimeout(resolve, 500));
     try {
-      setLoading(true);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const newTask = {
-        id: Date.now(),
-        ...taskData,
-        created_by: user,
-        created_at: new Date().toISOString(),
-      };
-
-      setTasks((prevTasks) => [newTask, ...prevTasks]);
-
-      // Create notification for assigned user
-      if (taskData.assigned_to) {
-        addNotification({
-          userId: taskData.assigned_to.id,
-          text: `You have been assigned a new task: "${taskData.title}"`,
-        });
+      const res = await AxiosInstance.post(`tasks/`, taskData);
+      if (res.status === 201 || res.status === 200) {
+        toast.success("New Task Addedd Successfully!");
+      } else {
+        toast.error("Failed to add task.");
       }
-
-      toast({
-        title: "Task Created",
-        description: "The task has been successfully created.",
-      });
-
-      return newTask;
-    } catch (error) {
-      console.error("Error adding task:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create task. Please try again.",
-      });
-      return null;
+    } catch (e) {
+      toast.error(e.message);
     } finally {
       setLoading(false);
     }
+
+    // Create notification for assigned user
+    // if (taskData.assigned_to) {
+    //   addNotification({
+    //     userId: taskData.assigned_to.id,
+    //     text: `You have been assigned a new task: "${taskData.title}"`,
+    //   });
+    // }
   };
 
   // Update a task
   const updateTask = async (taskId, updatedData) => {
     try {
       setLoading(true);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const taskIndex = tasks.findIndex((task) => task.id === taskId);
-
-      if (taskIndex === -1) {
-        throw new Error("Task not found");
+      try {
+        const res = await AxiosInstance.put(`tasks/${taskId}/`, updatedData);
+        if (res.status === 201 || res.status === 200) {
+          toast.success("Task Updated Successfully!");
+        } else {
+          toast.error("Failed to add task.");
+        }
+      } catch (e) {
+        toast.error(e.message);
+      } finally {
+        setLoading(false);
       }
 
-      const oldTask = tasks[taskIndex];
-      const updatedTask = { ...oldTask, ...updatedData };
-
-      const updatedTasks = [...tasks];
-      updatedTasks[taskIndex] = updatedTask;
-
-      setTasks(updatedTasks);
+      return
 
       // Create notifications for status changes
       if (updatedData.status && updatedData.status !== oldTask.status) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTask } from "@/context/TaskContext";
 import { useAuth } from "@/context/AuthContext";
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { TASK_STATUS } from "@/lib/constants";
 import CommentSection from "./CommentSection";
+import AxiosInstance from "./utils/AxiosInstance";
+import { toast } from "react-toastify";
 
 const TaskCard = ({ task, showComments = false }) => {
   const { updateTask } = useTask();
@@ -40,17 +42,23 @@ const TaskCard = ({ task, showComments = false }) => {
 
   const handleStatusChange = async (newStatus) => {
     if (task.status === newStatus) return;
-
     setStatusLoading(true);
     try {
-      await updateTask(task.id, { status: newStatus });
+      const res = await AxiosInstance.patch(`tasks/${task.id}/`, {
+        status: newStatus,
+      });
+      if (res.status === 200 || res.status === 201){
+
+        toast.success("Task Updated Successfully");
+        window.location.reload()
+      }
+      else toast.error("Failed to update");
     } catch (error) {
       console.error("Failed to update task status:", error);
     } finally {
       setStatusLoading(false);
     }
   };
-
   // Choose the badge color based on priority
   const getPriorityBadge = (priority) => {
     switch (priority) {
@@ -141,14 +149,14 @@ const TaskCard = ({ task, showComments = false }) => {
 
       {expanded && <CommentSection taskId={task.id} />}
 
-      {canUpdateStatus() && task.status !== TASK_STATUS.COMPLETED && (
+      {canUpdateStatus() && task.status !== "completed" && (
         <CardFooter className="pt-2 flex justify-end space-x-2">
-          {task.status === TASK_STATUS.PENDING && (
+          {task.status === "pending" && (
             <Button
               variant="outline"
               size="sm"
               disabled={statusLoading}
-              onClick={() => handleStatusChange(TASK_STATUS.IN_PROGRESS)}
+              onClick={() => handleStatusChange("in_progress")}
             >
               Start Progress
             </Button>
@@ -157,7 +165,7 @@ const TaskCard = ({ task, showComments = false }) => {
             variant="default"
             size="sm"
             disabled={statusLoading}
-            onClick={() => handleStatusChange(TASK_STATUS.COMPLETED)}
+            onClick={() => handleStatusChange("completed")}
           >
             Mark Complete
           </Button>

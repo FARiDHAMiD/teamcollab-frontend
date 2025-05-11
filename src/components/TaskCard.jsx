@@ -47,12 +47,10 @@ const TaskCard = ({ task, showComments = false }) => {
       const res = await AxiosInstance.patch(`tasks/${task.id}/`, {
         status: newStatus,
       });
-      if (res.status === 200 || res.status === 201){
-
+      if (res.status === 200 || res.status === 201) {
         toast.success("Task Updated Successfully");
-        window.location.reload()
-      }
-      else toast.error("Failed to update");
+        window.location.reload();
+      } else toast.error("Failed to update");
     } catch (error) {
       console.error("Failed to update task status:", error);
     } finally {
@@ -132,6 +130,21 @@ const TaskCard = ({ task, showComments = false }) => {
             <Clock className="h-4 w-4" />
             <span>Created: {formatDate(task.created_at)}</span>
           </div>
+          <span>
+            Attachments:
+            {task.attachment ? (
+              <a
+                href={task.attachment}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                View Attachment
+              </a>
+            ) : (
+              <span>No Attachment</span>
+            )}
+          </span>
           <div
             className="flex items-center space-x-2 cursor-pointer"
             onClick={() => setExpanded(!expanded)}

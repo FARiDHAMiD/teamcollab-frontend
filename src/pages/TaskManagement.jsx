@@ -1,20 +1,19 @@
-
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useTask } from '@/context/TaskContext';
-import Navbar from '@/components/Navbar';
-import SideMenu from '@/components/SideMenu';
-import TaskCard from '@/components/TaskCard';
-import TaskForm from '@/components/TaskForm';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { useTask } from "@/context/TaskContext";
+import Navbar from "@/components/Navbar";
+import SideMenu from "@/components/SideMenu";
+import TaskCard from "@/components/TaskCard";
+import TaskForm from "@/components/TaskForm";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,49 +24,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Plus, Search, Filter, Trash2, Edit } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, Filter, Trash2, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { USER_ROLES } from '@/lib/constants';
+} from "@/components/ui/select";
+import { USER_ROLES } from "@/lib/constants";
 
 const TaskManagement = () => {
   const { user, loading: authLoading } = useAuth();
   const { tasks, deleteTask, loading: taskLoading } = useTask();
   const navigate = useNavigate();
-  
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        navigate('/auth?mode=login');
-      } else if (user.role !== 'manager') {
-        navigate('/dashboard');
+        navigate("/auth?mode=login");
+      } else if (user.role !== "manager") {
+        navigate("/dashboard");
       }
     }
   }, [user, authLoading, navigate]);
-  
+
   useEffect(() => {
     // Filter tasks based on search term
-    const filtered = tasks.filter(task => 
-      task.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      task.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = tasks.filter(
+      (task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredTasks(filtered);
   }, [tasks, searchTerm]);
-  
+
   if (taskLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,9 +78,9 @@ const TaskManagement = () => {
       </div>
     );
   }
-  
-  if (!user || user.role !== 'manager') return null;
-  
+
+  if (!user || user.role !== "manager") return null;
+
   const handleDeleteTask = async () => {
     if (selectedTask) {
       await deleteTask(selectedTask.id);
@@ -88,7 +88,7 @@ const TaskManagement = () => {
       setDeleteDialogOpen(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
@@ -113,18 +113,21 @@ const TaskManagement = () => {
                 <DialogHeader>
                   <DialogTitle>Create New Task</DialogTitle>
                 </DialogHeader>
-                <TaskForm 
-                  onComplete={() => setCreateDialogOpen(false)} 
+                <TaskForm
+                  onComplete={() => setCreateDialogOpen(false)}
                   onCancel={() => setCreateDialogOpen(false)}
                 />
               </DialogContent>
             </Dialog>
           </div>
-          
+
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <Input
                 placeholder="Search tasks..."
                 value={searchTerm}
@@ -133,11 +136,14 @@ const TaskManagement = () => {
               />
             </div>
           </div>
-          
+
           {/* Task List with Edit/Delete Options */}
           {filteredTasks.length > 0 ? (
-            filteredTasks.map(task => (
-              <div key={task.id} className="mb-4 bg-white rounded-lg shadow-sm border">
+            filteredTasks.map((task) => (
+              <div
+                key={task.id}
+                className="mb-4 bg-white rounded-lg shadow-sm border"
+              >
                 <div className="p-4">
                   <div className="flex justify-between">
                     <h3 className="text-lg font-semibold">{task.title}</h3>
@@ -177,7 +183,7 @@ const TaskManagement = () => {
           )}
         </div>
       </div>
-      
+
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
@@ -185,7 +191,7 @@ const TaskManagement = () => {
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
           {selectedTask && (
-            <TaskForm 
+            <TaskForm
               task={selectedTask}
               onComplete={() => {
                 setEditDialogOpen(false);
@@ -199,7 +205,7 @@ const TaskManagement = () => {
           )}
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -214,7 +220,7 @@ const TaskManagement = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTask}
-              className="bg-red-500 hover:bg-red-600"
+              // className="bg-red-500 hover:bg-red-600"
             >
               Delete
             </AlertDialogAction>

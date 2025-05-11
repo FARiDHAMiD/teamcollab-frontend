@@ -36,6 +36,7 @@ const TaskForm = ({ task, onComplete, onCancel }) => {
     assigned_to_id: "",
     due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default to 1 week from now
     created_by: user.user_id,
+    attachment: null,
   });
   const [userOptions, setUserOptions] = useState([]);
 
@@ -54,6 +55,7 @@ const TaskForm = ({ task, onComplete, onCancel }) => {
         assigned_to_id: task.assigned_to_id,
         created_by: user.user_id,
         due_date: new Date(task.due_date),
+        attachment: task.attachment,
       });
       console.log(task);
     }
@@ -63,6 +65,10 @@ const TaskForm = ({ task, onComplete, onCancel }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, attachment: e.target.files[0] }));
   };
 
   const handleSubmit = async (e) => {
@@ -90,7 +96,11 @@ const TaskForm = ({ task, onComplete, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      encType="multipart/form-data"
+    >
       <div>
         <Label htmlFor="title">Task Title</Label>
         <Input
@@ -213,6 +223,19 @@ const TaskForm = ({ task, onComplete, onCancel }) => {
             </PopoverContent>
           </Popover>
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="attachment">Attachment</Label>
+        <Input
+          id="attachment"
+          name="attachment"
+          type={`file`}
+          // value={formData.attachment}
+          onChange={handleFileChange}
+          placeholder="Enter task attachment file"
+          required
+        />
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">

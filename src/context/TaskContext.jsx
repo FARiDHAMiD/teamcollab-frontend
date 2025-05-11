@@ -95,7 +95,9 @@ export const TaskProvider = ({ children }) => {
     // API call
     await new Promise((resolve) => setTimeout(resolve, 500));
     try {
-      const res = await AxiosInstance.post(`tasks/`, taskData);
+      const res = await AxiosInstance.post(`tasks/`, taskData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (res.status === 201 || res.status === 200) {
         toast.success("New Task Addedd Successfully!");
       } else {
@@ -121,7 +123,9 @@ export const TaskProvider = ({ children }) => {
     try {
       setLoading(true);
       try {
-        const res = await AxiosInstance.put(`tasks/${taskId}/`, updatedData);
+        const res = await AxiosInstance.put(`tasks/${taskId}/`, updatedData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         if (res.status === 201 || res.status === 200) {
           toast.success("Task Updated Successfully!");
         } else {
@@ -133,7 +137,7 @@ export const TaskProvider = ({ children }) => {
         setLoading(false);
       }
 
-      return
+      return;
 
       // Create notifications for status changes
       if (updatedData.status && updatedData.status !== oldTask.status) {
@@ -175,42 +179,31 @@ export const TaskProvider = ({ children }) => {
 
   // Delete a task
   const deleteTask = async (taskId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const taskToDelete = tasks.find((task) => task.id === taskId);
-
-      if (!taskToDelete) {
-        throw new Error("Task not found");
+      const res = await AxiosInstance.delete(`tasks/${taskId}/`);
+      if (res.status === 204 || res.status === 200) {
+        toast.success("Task Deleted Successfully!");
+      } else {
+        toast.error("Failed to delete task.");
       }
-
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-
-      // Also delete associated comments
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.task !== taskId)
-      );
-
-      toast({
-        title: "Task Deleted",
-        description: "The task has been successfully deleted.",
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete task. Please try again.",
-      });
-      return false;
+    } catch (e) {
+      toast.error(e.message);
     } finally {
       setLoading(false);
     }
+
+    return;
+
+    // Also delete associated comments
+    setComments((prevComments) =>
+      prevComments.filter((comment) => comment.task !== taskId)
+    );
+
+    toast({
+      title: "Task Deleted",
+      description: "The task has been successfully deleted.",
+    });
   };
 
   // Add a comment to a task
